@@ -1,13 +1,12 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import authRoutes from './routes/auth.js';
 import taskRoutes from './routes/tasks.js';
 import { isMongoEnabled } from './models/Schemas.js';
 
-// Load Env
-dotenv.config();
+// Env variables pre-loaded
 
 const app = express();
 const PORT = process.env.PORT || 5000;
