@@ -57,6 +57,10 @@ interface VortexStore {
   selectedTag: string;
   selectedPriority: string;
   
+  // Momentum Engine
+  momentumScore: number;
+  momentumDirection: 'up' | 'down' | 'stable';
+  
   // Pomodoro Focus Timer State
   timerSeconds: number;
   timerOriginalDuration: number;
@@ -93,6 +97,30 @@ interface VortexStore {
   setTimerSessionType: (type: 'work' | 'break') => void;
 }
 
+// Helper to calculate momentum score based on task completions, ratios, and streaks
+const calculateMomentum = (tasks: Task[], prevScore: number = 75): { score: number; direction: 'up' | 'down' | 'stable' } => {
+  const total = tasks.length;
+  if (total === 0) return { score: 50, direction: 'stable' };
+
+  const completed = tasks.filter(t => t.status === 'Done').length;
+  const inFlight = tasks.filter(t => t.status === 'In Progress').length;
+  
+  // Ratios
+  const completionRatio = completed / total;
+  const inFlightRatio = inFlight / total;
+
+  // Calculate score between 10 and 99
+  // 60% weight on completion, 20% on in-flight, and 20% bonus streak/load factor
+  const baseScore = (completionRatio * 60) + (inFlightRatio * 20) + 15;
+  const finalScore = Math.max(10, Math.min(99, Math.round(baseScore)));
+
+  let direction: 'up' | 'down' | 'stable' = 'stable';
+  if (finalScore > prevScore) direction = 'up';
+  else if (finalScore < prevScore) direction = 'down';
+
+  return { score: finalScore, direction };
+};
+
 export const useVortexStore = create<VortexStore>((set, get) => ({
   // Auth Defaults
   token: localStorage.getItem('vortex_jwt_token'),
@@ -113,6 +141,10 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
   searchQuery: '',
   selectedTag: 'All',
   selectedPriority: 'All',
+
+  // Momentum Defaults
+  momentumScore: 75,
+  momentumDirection: 'stable',
 
   // Timer Defaults
   timerSeconds: 25 * 60,
@@ -185,7 +217,7 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
         authLoading: false
       });
       
-      // Load user's seeded demo tasks
+      // Load user's seeded tasks
       get().fetchTasks();
       return true;
     } catch (err: any) {
@@ -234,7 +266,9 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
       tasks: [],
       focusedTaskId: null,
       activeDrawerTaskId: null,
-      timerIsRunning: false
+      timerIsRunning: false,
+      momentumScore: 75,
+      momentumDirection: 'stable'
     });
   },
 
@@ -242,7 +276,7 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
   // TASK ACTIONS
   // ----------------------------------------------------
   fetchTasks: async () => {
-    const { token } = get();
+    const { token, momentumScore } = get();
     if (!token) return;
 
     set({ tasksLoading: true, tasksError: null });
@@ -256,14 +290,21 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
       }
 
       const tasksData = await response.json();
-      set({ tasks: tasksData, tasksLoading: false });
+      const momentum = calculateMomentum(tasksData, momentumScore);
+
+      set({ 
+        tasks: tasksData, 
+        tasksLoading: false,
+        momentumScore: momentum.score,
+        momentumDirection: momentum.direction
+      });
     } catch (err: any) {
       set({ tasksError: err.message, tasksLoading: false });
     }
   },
 
   createTask: async (taskData) => {
-    const { token } = get();
+    const { token, tasks, momentumScore } = get();
     if (!token) return false;
 
     try {
@@ -282,9 +323,14 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
       }
 
       const createdTask = await response.json();
-      set(state => ({
-        tasks: [createdTask, ...state.tasks]
-      }));
+      const updatedTasks = [createdTask, ...tasks];
+      const momentum = calculateMomentum(updatedTasks, momentumScore);
+
+      set({
+        tasks: updatedTasks,
+        momentumScore: momentum.score,
+        momentumDirection: momentum.direction
+      });
       return true;
     } catch (err) {
       console.error('Failed to create task:', err);
@@ -293,7 +339,7 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
   },
 
   updateTask: async (id, taskData) => {
-    const { token, tasks } = get();
+    const { token, tasks, momentumScore } = get();
     if (!token) return false;
 
     try {
@@ -312,8 +358,13 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
       }
 
       const updatedTask = await response.json();
+      const updatedTasks = tasks.map(t => t._id === id ? updatedTask : t);
+      const momentum = calculateMomentum(updatedTasks, momentumScore);
+
       set({
-        tasks: tasks.map(t => t._id === id ? updatedTask : t)
+        tasks: updatedTasks,
+        momentumScore: momentum.score,
+        momentumDirection: momentum.direction
       });
       return true;
     } catch (err) {
@@ -323,24 +374,29 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
   },
 
   patchTaskStatus: async (id, status) => {
-    const { token, tasks } = get();
+    const { token, tasks, momentumScore } = get();
     if (!token) return;
 
-    // Optimistic Update for fluid drag and drop
+    // Optimistic Update for fluid status shift
     const originalTasks = [...tasks];
+    const optimisticTasks = tasks.map(t => {
+      if (t._id === id) {
+        const activities = [...t.activities, {
+          _id: Math.random().toString(),
+          text: `Status shifted: ${t.status} → ${status}`,
+          time: new Date().toISOString()
+        }];
+        return { ...t, status, activities };
+      }
+      return t;
+    });
+    
+    const optMomentum = calculateMomentum(optimisticTasks, momentumScore);
+
     set({
-      tasks: tasks.map(t => {
-        if (t._id === id) {
-          // Append client-side activity record for dynamic updates
-          const activities = [...t.activities, {
-            _id: Math.random().toString(),
-            text: `Drag flow status: ${t.status} → ${status}`,
-            time: new Date().toISOString()
-          }];
-          return { ...t, status, activities };
-        }
-        return t;
-      })
+      tasks: optimisticTasks,
+      momentumScore: optMomentum.score,
+      momentumDirection: optMomentum.direction
     });
 
     try {
@@ -358,11 +414,14 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
       }
 
       const updatedTask = await response.json();
+      const confirmedTasks = get().tasks.map(t => t._id === id ? updatedTask : t);
+      const finalMomentum = calculateMomentum(confirmedTasks, get().momentumScore);
       
-      // Update with server's confirmed activities
-      set(state => ({
-        tasks: state.tasks.map(t => t._id === id ? updatedTask : t)
-      }));
+      set({
+        tasks: confirmedTasks,
+        momentumScore: finalMomentum.score,
+        momentumDirection: finalMomentum.direction
+      });
     } catch (err) {
       console.error('Optimistic state patch failed, reverting:', err);
       set({ tasks: originalTasks });
@@ -370,7 +429,7 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
   },
 
   deleteTask: async (id) => {
-    const { token, tasks } = get();
+    const { token, tasks, momentumScore } = get();
     if (!token) return false;
 
     try {
@@ -383,9 +442,13 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
         throw new Error('Wipe operation failed');
       }
 
+      const updatedTasks = tasks.filter(t => t._id !== id);
+      const momentum = calculateMomentum(updatedTasks, momentumScore);
+
       set({
-        tasks: tasks.filter(t => t._id !== id),
-        // Close details or focus if open on deleted task
+        tasks: updatedTasks,
+        momentumScore: momentum.score,
+        momentumDirection: momentum.direction,
         focusedTaskId: get().focusedTaskId === id ? null : get().focusedTaskId,
         activeDrawerTaskId: get().activeDrawerTaskId === id ? null : get().activeDrawerTaskId
       });
@@ -421,31 +484,37 @@ export const useVortexStore = create<VortexStore>((set, get) => ({
   },
   tickTimer: () => set((state) => {
     if (state.timerSeconds <= 1) {
-      // Completed, toggle cycle types
       const nextType = state.timerSessionType === 'work' ? 'break' : 'work';
       const duration = nextType === 'work' ? 25 * 60 : 5 * 60;
       
-      // Standard staff engineer touch: ring a simple HTML5 Synth audio chime!
+      // Increment momentum on completing a Focus deep work session!
+      let newScore = state.momentumScore;
+      let newDir = state.momentumDirection;
+      if (state.timerSessionType === 'work') {
+        newScore = Math.min(99, state.momentumScore + 5);
+        if (newScore > state.momentumScore) newDir = 'up';
+      }
+
       try {
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5 Note
+        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime);
         osc.type = 'sine';
         gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.3);
-      } catch (err) {
-        console.warn('Synth beep not allowed without interaction:', err);
-      }
+      } catch (err) {}
 
       return {
         timerSeconds: duration,
         timerOriginalDuration: duration,
         timerIsRunning: false,
-        timerSessionType: nextType
+        timerSessionType: nextType,
+        momentumScore: newScore,
+        momentumDirection: newDir
       };
     }
     return { timerSeconds: state.timerSeconds - 1 };

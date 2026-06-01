@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useVortexStore } from '../store/useVortexStore';
 import type { Task } from '../store/useVortexStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Compass, Terminal, ShieldAlert, Sparkles, AlertCircle } from 'lucide-react';
+import { Search, Compass, Terminal, AlertCircle } from 'lucide-react';
 
 export default function CommandPalette() {
-  const { tasks, setActiveDrawerTaskId, setFocusedTaskId } = useVortexStore();
+  const { tasks, setActiveDrawerTaskId } = useVortexStore();
 
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -14,16 +14,13 @@ export default function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  // Global keydown listeners for shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Toggle with CMD+K or CTRL+K
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setIsOpen(prev => !prev);
       }
 
-      // Close with Escape
       if (e.key === 'Escape' && isOpen) {
         setIsOpen(false);
       }
@@ -32,7 +29,6 @@ export default function CommandPalette() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  // Focus input when palette opens
   useEffect(() => {
     if (isOpen) {
       setQuery('');
@@ -41,9 +37,8 @@ export default function CommandPalette() {
     }
   }, [isOpen]);
 
-  // Filter tasks based on query
   const filteredTasks = query.trim() === ''
-    ? tasks.slice(0, 5) // Show top 5 recent tasks by default
+    ? tasks.slice(0, 5)
     : tasks.filter(task => {
         const matchesTitle = task.title.toLowerCase().includes(query.toLowerCase());
         const matchesDesc = task.description?.toLowerCase().includes(query.toLowerCase()) || false;
@@ -52,7 +47,6 @@ export default function CommandPalette() {
         return matchesTitle || matchesDesc || matchesTags || matchesStatus;
       });
 
-  // Handle arrow key navigation inside list
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen || filteredTasks.length === 0) return;
 
@@ -68,7 +62,6 @@ export default function CommandPalette() {
     }
   };
 
-  // Scroll active element into view
   useEffect(() => {
     if (resultsRef.current) {
       const activeEl = resultsRef.current.children[selectedIndex] as HTMLElement;
@@ -79,7 +72,6 @@ export default function CommandPalette() {
   }, [selectedIndex]);
 
   const handleSelect = (task: Task) => {
-    // Open task details
     setActiveDrawerTaskId(task._id);
     setIsOpen(false);
   };
@@ -91,26 +83,24 @@ export default function CommandPalette() {
           className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 select-none pointer-events-none"
           onKeyDown={handleKeyDown}
         >
-          {/* Blur backdrop overlay */}
+          {/* Backdrop overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsOpen(false)}
-            className="absolute inset-0 bg-[#020309]/80 backdrop-blur-md pointer-events-auto"
+            className="absolute inset-0 bg-[#020204]/85 pointer-events-auto"
           />
 
-          {/* Palette Content Box */}
+          {/* Palette Box */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.97, y: -10 }}
+            initial={{ opacity: 0, scale: 0.98, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: -10 }}
+            exit={{ opacity: 0, scale: 0.98, y: -8 }}
             transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-            className="w-full max-w-xl glass-panel rounded-2xl border border-white/10 shadow-glass flex flex-col pointer-events-auto overflow-hidden relative z-10 bg-[#040612]/95"
+            className="w-full max-w-xl bg-[#0c0d16] border border-white/5 shadow-spotlight rounded-xl flex flex-col pointer-events-auto overflow-hidden relative z-10"
           >
-            <div className="scanner-line absolute top-0 left-0 right-0 h-8 opacity-10 pointer-events-none" />
-
-            {/* SEARCH INPUT BAR */}
+            {/* SEARCH INPUT */}
             <div className="flex items-center space-x-3 px-4 py-3.5 border-b border-white/5 relative">
               <Search className="w-4 h-4 text-slate-500" />
               <input
@@ -121,92 +111,69 @@ export default function CommandPalette() {
                   setQuery(e.target.value);
                   setSelectedIndex(0);
                 }}
-                placeholder="Scan quantum registers (search title, tags, status)..."
-                className="flex-1 bg-transparent border-none text-slate-200 placeholder:text-slate-600 text-xs focus:outline-none focus:ring-0"
+                placeholder="Search work register..."
+                className="flex-1 bg-transparent border-none text-slate-200 placeholder:text-slate-700 text-xs focus:outline-none focus:ring-0"
               />
-              <span className="text-[9px] font-mono text-slate-500 bg-white/5 px-2 py-0.5 rounded border border-white/5 uppercase select-none">
-                {query.trim() === '' ? 'RECENT' : `${filteredTasks.length} RESULTS`}
+              <span className="text-[8px] font-mono text-slate-500 bg-white/5 px-2 py-0.5 rounded border border-white/5 uppercase select-none">
+                {query.trim() === '' ? 'RECENT' : `${filteredTasks.length} NODES`}
               </span>
             </div>
 
-            {/* RESULTS VIEW */}
+            {/* RESULTS */}
             <div 
               ref={resultsRef}
-              className="max-h-72 overflow-y-auto no-scrollbar p-2 space-y-1 bg-[#03050c]/60"
+              className="max-h-64 overflow-y-auto no-scrollbar p-2 space-y-1 bg-[#090a10]"
             >
               {filteredTasks.length > 0 ? (
                 filteredTasks.map((task, idx) => {
                   const isSelected = selectedIndex === idx;
-                  const statusColors = task.status === 'Done' 
-                    ? 'text-vortex-success bg-vortex-success/10' 
-                    : task.status === 'In Progress' 
-                    ? 'text-vortex-primary bg-vortex-primary/10' 
-                    : 'text-vortex-secondary bg-vortex-secondary/10';
 
                   return (
                     <button
                       key={task._id}
                       onClick={() => handleSelect(task)}
                       onMouseEnter={() => setSelectedIndex(idx)}
-                      className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all duration-200 border ${isSelected ? 'bg-vortex-primary/10 border-vortex-primary/30 shadow-neon-primary/10 text-white' : 'bg-transparent border-transparent text-slate-400'}`}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-left transition-all duration-150 border ${isSelected ? 'bg-vortex-primary/10 border-vortex-primary/20 text-white' : 'bg-transparent border-transparent text-slate-500'}`}
                     >
                       <div className="flex items-center space-x-3 min-w-0">
-                        <Terminal className={`w-4 h-4 shrink-0 ${isSelected ? 'text-vortex-secondary' : 'text-slate-600'}`} />
+                        <Terminal className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-vortex-primary' : 'text-slate-700'}`} />
                         <div className="truncate">
-                          <h4 className={`text-xs font-semibold leading-normal ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                          <h4 className={`text-xs font-medium truncate ${isSelected ? 'text-white' : 'text-slate-300'}`}>
                             {task.title}
                           </h4>
-                          {task.description && (
-                            <p className="text-[10px] text-slate-500 mt-0.5 truncate max-w-md">
-                              {task.description}
-                            </p>
-                          )}
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-2.5 shrink-0 select-none">
-                        {/* Task Priority */}
-                        <span className={`text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-white/5 font-bold text-slate-500`}>
-                          {task.priority}
-                        </span>
-
-                        {/* Task Status */}
-                        <span className={`text-[8px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded border border-white/5 font-bold ${statusColors}`}>
-                          {task.status}
-                        </span>
+                      <div className="flex items-center space-x-2 shrink-0 select-none text-[8px] font-mono">
+                        <span className="text-slate-600 uppercase">{task.priority}</span>
+                        <span className="text-slate-600">//</span>
+                        <span className="text-slate-500 uppercase">{task.status}</span>
                       </div>
                     </button>
                   );
                 })
               ) : (
-                <div className="flex flex-col items-center justify-center text-center p-8 border border-dashed border-white/5 rounded-xl">
-                  <AlertCircle className="w-8 h-8 text-slate-600 animate-pulse mb-2" />
-                  <h4 className="text-[11px] font-semibold text-slate-400">Scan sector empty</h4>
-                  <p className="text-[9px] text-slate-600 max-w-[180px] mt-1 leading-relaxed">
-                    No registry matches your sequence description.
-                  </p>
+                <div className="flex flex-col items-center justify-center text-center p-8 border border-dashed border-white/5 rounded-lg select-none">
+                  <AlertCircle className="w-6 h-6 text-slate-700 mb-2 animate-pulse" />
+                  <h4 className="text-[10px] font-mono text-slate-500 uppercase">Registry clean</h4>
                 </div>
               )}
             </div>
 
-            {/* KEYBOARD HOTKEYS INFO FOOTER */}
-            <footer className="px-4 py-2 bg-slate-950/80 border-t border-white/5 flex items-center justify-between text-[8px] font-mono text-slate-500 select-none shrink-0">
+            {/* FOOTER KEYBOARD HINTS */}
+            <footer className="px-4 py-2 bg-[#06070b] border-t border-white/5 flex items-center justify-between text-[8px] font-mono text-slate-600 select-none shrink-0 uppercase tracking-wider">
               <span className="flex items-center space-x-1">
-                <Compass className="w-3.5 h-3.5 text-vortex-primary animate-pulse" />
-                <span>VORTEX OS COMMANDS</span>
+                <Compass className="w-3.5 h-3.5 text-vortex-primary" />
+                <span>WORKSPACE REGISTRY QUERY</span>
               </span>
-              <div className="flex items-center space-x-3.5">
+              <div className="flex items-center space-x-3">
                 <span className="flex items-center space-x-1">
-                  <kbd className="px-1 bg-slate-900 border border-slate-700 text-slate-400 rounded">↓↑</kbd>
+                  <kbd className="px-1 bg-slate-900 border border-slate-700 text-slate-500 rounded">↓↑</kbd>
                   <span>Navigate</span>
                 </span>
                 <span className="flex items-center space-x-1">
                   <kbd className="px-1 bg-slate-900 border border-slate-700 text-slate-400 rounded">Enter</kbd>
                   <span>Select</span>
-                </span>
-                <span className="flex items-center space-x-1">
-                  <kbd className="px-1 bg-slate-900 border border-slate-700 text-slate-400 rounded">Esc</kbd>
-                  <span>Wipe</span>
                 </span>
               </div>
             </footer>

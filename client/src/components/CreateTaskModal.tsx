@@ -2,13 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useVortexStore } from '../store/useVortexStore';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { z } from 'zod';
-import { X, ClipboardList, Tag, Sparkles, Check } from 'lucide-react';
+import { X, ClipboardList, Tag, Sparkles } from 'lucide-react';
 
 gsap.registerPlugin(useGSAP);
 
-// Zod Schema for task validation
+// Zod validation
 const taskSchema = z.object({
   title: z.string().min(3, { message: "Identifier must be at least 3 characters long" }),
   description: z.string().optional(),
@@ -37,32 +37,29 @@ export default function CreateTaskModal() {
   const modalRef = useRef<HTMLDivElement>(null);
   const checkPathRef = useRef<SVGPathElement>(null);
 
-  // Stagger inputs on open
+  // Stagger inputs
   useGSAP(() => {
     if (isCreateModalOpen) {
       gsap.fromTo('.modal-stagger',
-        { opacity: 0, y: 15 },
-        { opacity: 1, y: 0, duration: 0.5, stagger: 0.05, ease: 'power2.out' }
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.45, stagger: 0.05, ease: 'power2.out' }
       );
     }
   }, [isCreateModalOpen]);
 
-  // Success draw checkmark path effect via GSAP
+  // Success draw checkmark
   useEffect(() => {
     if (showSuccess && checkPathRef.current) {
       const path = checkPathRef.current;
       const length = path.getTotalLength();
-      
-      // Reset path dash definitions
       path.style.strokeDasharray = `${length}`;
       path.style.strokeDashoffset = `${length}`;
 
-      // Draw path
       gsap.to(path, {
         strokeDashoffset: 0,
-        duration: 0.65,
+        duration: 0.6,
         ease: 'power2.inOut',
-        delay: 0.15
+        delay: 0.1
       });
     }
   }, [showSuccess]);
@@ -85,7 +82,6 @@ export default function CreateTaskModal() {
     e.preventDefault();
     setErrors({});
     
-    // Validate via Zod schema
     const validation = taskSchema.safeParse({
       title,
       description,
@@ -120,10 +116,8 @@ export default function CreateTaskModal() {
     if (success) {
       setShowSuccess(true);
       
-      // Delay closing modal slightly to enjoy the holographic draw success checkmark!
       setTimeout(() => {
         setCreateModalOpen(false);
-        // Reset states
         setTitle('');
         setDescription('');
         setStatus('Todo');
@@ -132,68 +126,67 @@ export default function CreateTaskModal() {
         setTags([]);
         setShowSuccess(false);
         setIsSubmitting(false);
-      }, 1500);
+      }, 1300);
     } else {
       setIsSubmitting(false);
-      setErrors({ global: "Could not sync sequence to task database" });
+      setErrors({ global: "Could not sync sequence to database" });
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 select-none">
       
-      {/* Dim backdrop blur overlay */}
+      {/* Dim backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={() => !showSuccess && setCreateModalOpen(false)}
-        className="absolute inset-0 bg-black/75 backdrop-blur-md pointer-events-auto"
+        className="absolute inset-0 bg-[#020204]/90 pointer-events-auto"
       />
 
-      {/* Modal Content Box */}
+      {/* Modal Box */}
       <motion.div
         ref={modalRef}
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.97, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-        className="w-full max-w-lg glass-panel rounded-3xl border border-white/10 shadow-glass flex flex-col pointer-events-auto overflow-hidden relative z-10 select-none bg-[#03050c]"
+        exit={{ opacity: 0, scale: 0.97, y: 15 }}
+        transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+        className="w-full max-w-lg bg-[#0c0d16] border border-white/5 shadow-spotlight rounded-2xl flex flex-col pointer-events-auto overflow-hidden relative z-10 select-none"
       >
-        <div className="scanner-line absolute top-0 left-0 right-0 h-10 opacity-15 pointer-events-none" />
-
-        {/* HOLOGRAPHIC SUCCESS CHECKMARK WIDGET */}
-        {showSuccess ? (
-          <div className="absolute inset-0 bg-[#03050c] z-20 flex flex-col items-center justify-center text-center p-8 select-none">
+        
+        {/* SUCCESS VIEW */}
+        {showSuccess && (
+          <div className="absolute inset-0 bg-[#0c0d16] z-20 flex flex-col items-center justify-center text-center p-8 select-none">
             <svg 
-              className="w-24 h-24 text-vortex-secondary filter drop-shadow-neon-secondary mb-5" 
+              className="w-16 h-16 text-vortex-primary mb-4" 
               viewBox="0 0 100 100"
               fill="none"
               stroke="currentColor"
-              strokeWidth="5"
+              strokeWidth="4"
             >
-              <circle cx="50" cy="50" r="44" stroke="rgba(6, 182, 212, 0.15)" />
+              <circle cx="50" cy="50" r="44" stroke="rgba(255, 255, 255, 0.02)" />
               <path 
                 ref={checkPathRef}
-                d="M30 52 L45 66 L70 36" 
+                d="M32 52 L46 66 L68 36" 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
               />
             </svg>
-            <h3 className="text-xl font-bold tracking-wider text-slate-100 animate-pulse-slow">
-              TASK SEQUENCE INITIATED
+            <h3 className="text-sm font-bold tracking-wider text-slate-100 font-mono">
+              OPERATION INSTANTIATED
             </h3>
-            <p className="text-xs text-slate-400 mt-1 font-mono tracking-widest uppercase">
-              Core database synchronised
+            <p className="text-[9px] text-slate-500 mt-1 font-mono tracking-widest uppercase">
+              Telemetry registers synchronized
             </p>
           </div>
-        ) : null}
+        )}
 
         {/* HEADER */}
-        <header className="p-6 border-b border-white/5 flex items-center justify-between shrink-0 select-none">
-          <div className="flex items-center space-x-3.5">
-            <ClipboardList className="w-5 h-5 text-vortex-secondary animate-pulse" />
-            <h3 className="font-bold text-sm text-slate-200 tracking-wide">Orchestrate Task Sequence</h3>
+        <header className="p-5 border-b border-white/5 flex items-center justify-between shrink-0 select-none">
+          <div className="flex items-center space-x-3 text-slate-400">
+            <ClipboardList className="w-4.5 h-4.5 text-vortex-primary" />
+            <h3 className="font-bold text-xs tracking-wider uppercase font-mono text-slate-200">Declare Operation</h3>
           </div>
           <button
             onClick={() => setCreateModalOpen(false)}
@@ -203,49 +196,48 @@ export default function CreateTaskModal() {
           </button>
         </header>
 
-        {/* VALIDATION OR GLOBAL ERROR BOX */}
         {errors.global && (
-          <div className="bg-vortex-danger/10 border-b border-vortex-danger/20 text-vortex-danger px-6 py-2.5 text-xs text-center">
+          <div className="bg-vortex-danger/10 border-b border-vortex-danger/20 text-vortex-danger px-6 py-2.5 text-xs text-center font-mono">
             {errors.global}
           </div>
         )}
 
-        {/* FORM SCROLLPORT */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="flex-1 p-5 space-y-4 no-scrollbar">
           
-          {/* Title Input */}
+          {/* Title */}
           <div className="flex flex-col space-y-1.5 modal-stagger">
-            <label className="text-[9px] font-mono tracking-widest text-slate-500 uppercase">Task Identifier</label>
+            <label className="text-[8px] font-mono tracking-widest text-slate-500 uppercase">Operation Identifier</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Align plasma injectors"
-              className={`w-full glass-input rounded-xl py-2.5 px-3.5 text-xs text-slate-200 placeholder:text-slate-700 focus:outline-none ${errors.title ? 'border-vortex-danger/50 focus:border-vortex-danger/55 focus:shadow-neon-danger/10' : ''}`}
+              className={`w-full workspace-input rounded-xl py-2 px-3 text-xs text-slate-300 placeholder:text-slate-700 focus:outline-none ${errors.title ? 'border-vortex-danger/40 focus:border-vortex-danger/50' : ''}`}
             />
             {errors.title && (
-              <span className="text-[10px] text-vortex-danger font-mono font-medium">{errors.title}</span>
+              <span className="text-[10px] text-vortex-danger font-mono">{errors.title}</span>
             )}
           </div>
 
-          {/* Description Textarea */}
+          {/* Description */}
           <div className="flex flex-col space-y-1.5 modal-stagger">
-            <label className="text-[9px] font-mono tracking-widest text-slate-500 uppercase">Scope parameter Logs</label>
+            <label className="text-[8px] font-mono tracking-widest text-slate-500 uppercase">Scope parameters / Logs</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Record task parameters or logs..."
               rows={3}
-              className="w-full glass-input rounded-xl py-2.5 px-3.5 text-xs text-slate-200 placeholder:text-slate-700 leading-relaxed focus:outline-none"
+              className="w-full workspace-input rounded-xl py-2 px-3 text-xs text-slate-300 placeholder:text-slate-700 leading-relaxed focus:outline-none"
             />
           </div>
 
-          {/* Matrix selectors */}
-          <div className="grid grid-cols-2 gap-4 modal-stagger bg-white/1 px-4 py-3 rounded-2xl border border-white/5">
+          {/* Selectors */}
+          <div className="grid grid-cols-2 gap-4 modal-stagger bg-white/1 px-4 py-2.5 rounded-xl border border-white/5">
             
             {/* Status Select */}
             <div className="space-y-1">
-              <span className="text-[9px] font-mono tracking-widest text-slate-500 uppercase">State Status</span>
+              <span className="text-[8px] font-mono tracking-widest text-slate-500 uppercase">State status</span>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as any)}
@@ -259,79 +251,74 @@ export default function CreateTaskModal() {
 
             {/* Priority Select */}
             <div className="space-y-1">
-              <span className="text-[9px] font-mono tracking-widest text-slate-500 uppercase">Priority level</span>
+              <span className="text-[8px] font-mono tracking-widest text-slate-500 uppercase">Priority frequency</span>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as any)}
                 className="w-full bg-transparent text-xs text-slate-300 font-semibold focus:outline-none cursor-pointer"
               >
-                <option value="Low" className="bg-slate-950 text-vortex-secondary">Low Priority</option>
+                <option value="Low" className="bg-slate-950 text-slate-400">Low Priority</option>
                 <option value="Medium" className="bg-slate-950 text-vortex-primary">Medium Priority</option>
                 <option value="High" className="bg-slate-950 text-vortex-danger">High Priority</option>
               </select>
             </div>
           </div>
 
-          {/* Due date Expiration */}
+          {/* Due date */}
           <div className="flex flex-col space-y-1.5 modal-stagger">
-            <label className="text-[9px] font-mono tracking-widest text-slate-500 uppercase">Expiration Chronology</label>
+            <label className="text-[8px] font-mono tracking-widest text-slate-500 uppercase">Expiration Chronology</label>
             <input
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full glass-input rounded-xl py-2.5 px-3.5 text-xs text-slate-300 focus:outline-none cursor-pointer"
+              className="w-full workspace-input rounded-xl py-2 px-3 text-xs text-slate-300 focus:outline-none cursor-pointer"
             />
           </div>
 
           {/* Tags */}
           <div className="space-y-2 modal-stagger pt-3 border-t border-white/5">
-            <label className="text-[9px] font-mono tracking-widest text-slate-500 uppercase flex items-center space-x-1">
-              <Tag className="w-3.5 h-3.5 text-vortex-secondary" />
+            <label className="text-[8px] font-mono tracking-widest text-slate-500 uppercase flex items-center space-x-1">
+              <Tag className="w-3.5 h-3.5 text-slate-500" />
               <span>CLASSIFICATION LABELS</span>
             </label>
             
-            {/* Tag add input */}
             <div className="flex gap-2">
               <input
                 type="text"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 placeholder="Declare category label..."
-                className="flex-1 glass-input rounded-lg py-2 px-3 text-xs text-slate-200 placeholder:text-slate-700 focus:outline-none"
+                className="flex-1 workspace-input rounded-lg py-1.5 px-3 text-xs text-slate-200 placeholder:text-slate-700 focus:outline-none"
               />
               <button
                 type="button"
                 onClick={handleAddTag}
-                className="px-4 text-[10px] font-mono font-bold bg-white/5 hover:bg-white/10 text-white rounded-lg border border-white/5 transition-all"
+                className="px-3 text-[9px] font-mono font-bold bg-white/5 hover:bg-white/10 text-white rounded-lg border border-white/5 transition-all"
               >
                 ATTACH
               </button>
             </div>
 
-            {/* Active labels */}
             <div className="flex flex-wrap gap-1.5 pt-1">
               {tags.map((tag, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center space-x-1 bg-white/5 border border-white/5 pl-2 pr-1 py-0.5 rounded-full text-[8px] font-mono uppercase text-slate-300 hover:border-vortex-danger/30 transition-all cursor-pointer"
+                  className="flex items-center space-x-1 bg-white/5 border border-white/5 pl-2 pr-1 py-0.5 rounded-full text-[8px] font-mono uppercase text-slate-400 hover:border-vortex-danger/30 transition-all cursor-pointer"
                   onClick={() => handleRemoveTag(tag)}
                 >
                   <span>{tag}</span>
-                  <X className="w-2 h-2 text-slate-500 hover:text-vortex-danger" />
+                  <X className="w-2 h-2 text-slate-500" />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Spacer */}
-          <div className="h-4" />
-
-          {/* SUBMIT TRIGGERS */}
-          <div className="flex items-center justify-end space-x-3.5 modal-stagger border-t border-white/5 pt-5 select-none">
+          {/* Actions */}
+          <div className="flex items-center justify-end space-x-3 modal-stagger border-t border-white/5 pt-4 select-none">
             <button
               type="button"
               onClick={() => setCreateModalOpen(false)}
-              className="py-2.5 px-4 rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold transition-all duration-300"
+              className="py-2 px-4 rounded-xl border border-white/5 hover:bg-white/5 text-slate-400 hover:text-white text-xs font-semibold font-mono transition-all"
             >
               Cancel
             </button>
@@ -339,17 +326,14 @@ export default function CreateTaskModal() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="py-2.5 px-6 rounded-xl bg-gradient-to-r from-vortex-primary to-vortex-accent hover:shadow-neon-primary text-white text-xs font-semibold flex items-center space-x-2 transition-all duration-300 hover:-translate-y-0.5 shadow-glass"
+              className="py-2 px-5 rounded-xl bg-vortex-primary hover:bg-vortex-primary/95 text-white text-xs font-semibold font-mono flex items-center space-x-1.5 transition-all active:scale-95 shadow-razor"
             >
               {isSubmitting ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Configuring...</span>
-                </>
+                <span>Configuring...</span>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 text-white" />
-                  <span>Ignite Sequence</span>
+                  <span>ENGAGE INDEX</span>
                 </>
               )}
             </button>

@@ -3,133 +3,93 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  
   body {
-    @apply bg-vortex-bg text-slate-100 antialiased overflow-x-hidden selection:bg-vortex-primary/30 selection:text-white font-sans;
-    background-color: #050816;
-    background-image: 
-      radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.08) 0%, transparent 40%),
-      radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
-      radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.04) 0%, transparent 60%);
+    @apply bg-vortex-bg text-slate-300 antialiased overflow-hidden selection:bg-vortex-primary/20 selection:text-white;
+    background-color: #05060b;
   }
 
-  /* Custom Premium Scrollbar */
+  /* Custom Clean Muted Scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
   ::-webkit-scrollbar-track {
-    background: rgba(5, 8, 22, 0.5);
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(124, 58, 237, 0.2);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 99px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(124, 58, 237, 0.5);
-    box-shadow: 0 0 8px rgba(124, 58, 237, 0.4);
+    background: rgba(124, 58, 237, 0.3);
   }
 }
 
-/* Glassmorphism Classes */
-.glass-panel {
+/* Premium Workspace Elements */
+.workspace-segment {
+  background: #0c0d16;
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.01);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.workspace-segment-active {
+  background: #0f111f;
+  border-color: rgba(124, 58, 237, 0.35);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.7), 0 0 12px rgba(124, 58, 237, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.02);
+}
+
+.workspace-input {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.workspace-input:focus {
   background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-}
-
-.glass-panel-hover {
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.glass-panel-hover:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(124, 58, 237, 0.25);
-  box-shadow: 0 12px 40px 0 rgba(124, 58, 237, 0.12), 0 0 15px rgba(124, 58, 237, 0.1);
-}
-
-.glass-input {
-  background: rgba(255, 255, 255, 0.015);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.glass-input:focus {
-  background: rgba(255, 255, 255, 0.035);
-  border-color: rgba(6, 182, 212, 0.4);
-  box-shadow: 0 0 12px rgba(6, 182, 212, 0.2), inset 0 0 4px rgba(6, 182, 212, 0.1);
+  border-color: rgba(124, 58, 237, 0.4);
   outline: none;
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.1);
 }
 
-/* Digital Grid Background */
-.digital-grid {
-  background-size: 40px 40px;
+/* Slim grid overlay */
+.minimal-grid {
+  background-size: 60px 60px;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.006) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.006) 1px, transparent 1px);
 }
 
-/* Aurora Sphere Animators */
-.aurora-sphere {
-  filter: blur(80px);
-  mix-blend-mode: screen;
-  pointer-events: none;
+/* Minimal Shimmer Skeleton */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.01) 25%,
+    rgba(255, 255, 255, 0.03) 50%,
+    rgba(255, 255, 255, 0.01) 75%
+  );
+  background-size: 200% 100%;
+  animation: skelShimmer 2s infinite;
 }
 
-/* Custom Hide Scrollbar for Drag lists */
+@keyframes skelShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Simple horizontally sweeping animations */
+@keyframes scanHorizontal {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-/* Shimmer Skeletal Loading Effects */
-.shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.02) 25%,
-    rgba(255, 255, 255, 0.06) 50%,
-    rgba(255, 255, 255, 0.02) 75%
-  );
-  background-size: 200% 100%;
-  animation: loadingShimmer 1.5s infinite;
-}
-
-@keyframes loadingShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* Hologram Scanning Lines */
-.scanner-line {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(6, 182, 212, 0.15) 50%,
-    transparent 100%
-  );
-  background-size: 100% 4px;
-  animation: scanLoop 4s linear infinite;
-}
-
-@keyframes scanLoop {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
-}
-
-/* Custom Range Input Track Customizations */
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #06B6D4;
-  cursor: pointer;
-  box-shadow: 0 0 10px #06B6D4;
-  transition: all 0.1s ease;
-}
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.3);
 }
