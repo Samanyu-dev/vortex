@@ -1,39 +1,35 @@
 # 🌌 VORTEX — "Turn tasks into momentum."
 
-**VORTEX** is an ultra-premium, production-ready, futuristic task management operating system built to demonstrate world-class front-end motion design, sound, robust system architectures, and flawless user experiences. Inspired by high-end design paradigms from Arc Browser, Linear, Stripe, and modern sci-fi interfaces, VORTEX elevates task management into a high-performance productivity cockpit.
+**VORTEX** is an ultra-premium, production-ready, futuristic task management operating system built to demonstrate world-class front-end motion design, robust full-stack architecture, and fluid user experiences. Inspired by high-end design utilities like **Linear, Arc Browser, Raycast, and Apple Vision Pro**, VORTEX transforms task management into a high-performance productivity cockpit.
+
+### 🔗 Live Cloud Deployments
+* **Production Workspace (Vercel):** [https://vortex-task.vercel.app](https://vortex-task.vercel.app)
+* **Production API (Render):** [https://vortex-api-dsx0.onrender.com](https://vortex-api-dsx0.onrender.com)
+* **Production Database (MongoDB Atlas):** Mumbai (`ap-south-1`) Shared Cluster
 
 ---
 
-## 🚀 Key Features
+## 🚀 Product Features
 
-* **Futuristic Split-Screen Access:**
-  * **Left Side:** Interactive GSAP particle canvas with custom node connections, floating 3D glass cards showing live telemetry, and aurora color fields.
-  * **Right Side:** High-tech glassmorphism forms with slide-in tab transitions and real-time cryptography status indications.
-* **The "Task Flow Engine" (Workspace):**
-  * Elegant glassmorphic columns with dynamic glow borders indicating active drop targets.
-  * Staggered GSAP/Framer-motion columns entering the viewport gracefully.
-  * Custom tags filter bar and inline search parameters.
-* ** Bespoke 3D Hover tilt & Drag-and-Drop:**
-  * Task cards react to mouse coordinates with a custom GSAP 3D hover tilt, neon priority glow flares, and floating lighting effects.
-  * Cards scale to 1.05 and skew dynamically based on dragging velocity, with neighbors sliding elastic-spring fashion.
-* **Spotlight Focus Mode (Deep Work Cockpit):**
-  * Fades and blurs peripheral UI components.
-  * Displays the selected task in high-contrast centered focus.
-  * Houses an interactive **Pomodoro Timer** with countdown circles, cycles (Deep Work / Chill Break), and HTML5 audio synthesizer chimes on cycle completion.
-* **CMD+K fuzzy Search Command Palette:**
+* **Flowing Stream Workspace:**
+  * Replaces standard vertical card Kanban columns with a single, flowing horizontal stream divided into logical sectors: `In Queue` (Todo), `In Flight` (In Progress), and `Completed` (Done).
+  * **Compact Horizontal Accordions:** Tasks exist as compact horizontal segments. Clicking a segment expands it inline smoothly with spring physics, revealing subtask checklists and note parameters. 
+  * **Cognitive Spotlight:** Only *one* task segment can be expanded at any time. Expanding another task automatically collapses the previous one, locking in focus.
+* **The Momentum Engine:**
+  * Replaces heavy dashboard widgets with a sleek, live momentum score ticker (`MOMENTUM // {Score} // {Trajectory}`).
+  * Calculates an active score (between `10` and `99`) in real-time using completed ratios, flight load factors, and Focus streaks, notifying you instantly on trajectory shifts.
+* **Zen Focus Mode:**
+  * Spotlights your active task. Engaging focus collapses the sidebar to `0px` and slides it away completely, blurs background elements, and blackouts the viewport into a matte void (`#020204`).
+  * Features a gorgeous, thin-stroke circular **Pomodoro Countdown Timer** with cycle triggers (Work/Break) and retro HTML5 Synthesizer chime beeps on completion.
+* **Arc-Style Expandable Sidebar:**
+  * A minimal 64px-wide vertical icon rail in its collapsed state.
+  * Hovering expands it smoothly to 240px to reveal text labels, keeping the workspace canvas visually clean.
+* **CMD+K Search Command Palette:**
   * Floating fuzzy search terminal listening to global key shortcuts.
-  * Arrow key list traversal and hotkeys (`Esc` to close, `Enter` to edit).
-* **Quantum Telemetry Analytics:**
-  * Metric cards displaying total orchestrations, completed tasks, and rate of productivity.
-  * GSAP count-up numbers transitioning from 0 on load.
-  * Glowing SVG wave bars detail weekly output metrics.
-* **Core Matrix Settings:**
-  * Ambassador for ambient theme customization.
-  * Interactive sliders for backdrop blur strength and glow intensities.
-  * Reset registry keys (database re-seeding).
-* **Robust REST Backend with Zero-Config Fallback:**
-  * Node.js/Express with ES Modules and strict JWT authentication.
-  * Smart connector: automatically fallbacks to a high-performance, persistent JSON database inside `server/data/db.json` when no MongoDB Atlas credentials are provided. Instantly testable out-of-the-box!
+  * Arrow key list traversal and hotkeys (`Esc` to close, `Enter` to inspect).
+* **Robust JWT Session Auth:**
+  * Secure user registration, sign-in, and persistent sessions.
+  * Pre-seeds new accounts with cinematic sci-fi tasks (e.g. *"Calibrate warp drive coils"*, *"Refactor quantum state manager"*) to demonstrate metrics instantly.
 
 ---
 
@@ -43,10 +39,10 @@
 * **React 19**
 * **TypeScript** (Strict Mode compile compliant)
 * **Vite** (Ultra-fast packaging)
-* **Tailwind CSS** (Futuristic glass styling tokens)
-* **GSAP + @gsap/react** (3D tilt, count-up counters, circular countdowns, particles canvas)
-* **Framer Motion** (Spring drawer slides, tab indicator shifts, modal popups)
-* **Zzustand** (Unified global sync state)
+* **Tailwind CSS** (Futuristic glass and matte styling tokens)
+* **GSAP + @gsap/react** (Expand morphs, Pomodoro circular meters, canvas particles, count-ups)
+* **Framer Motion** (Spring drawer slides, tab sliders, Zen overlays)
+* **Zustand** (Unified global sync state store)
 * **Zod** (Form validations)
 * **Lucide Icons** (Futuristic HUD vector symbols)
 
@@ -74,13 +70,13 @@ vortex/
 │   │   │   ├── Login.tsx       # Canvas particle access key panel
 │   │   │   ├── Settings.tsx    # Calibration preferences
 │   │   │   ├── Sidebar.tsx     # Progress SVGs & widgets
-│   │   │   ├── TaskBoard.tsx   # Status columns & drag targets
-│   │   │   └── TaskCard.tsx    # 3D interactive tilt cards
+│   │   │   ├── TaskBoard.tsx   # Horizontal sections & stream
+│   │   │   └── TaskCard.tsx    # Horizontal accordion cards
 │   │   ├── store/
 │   │   │   └── useVortexStore.ts # Unified Zustand store
-│   │   ├── index.css           # Glowing tokens and keyframe animations
+│   │   ├── index.css           # Muted slate tokens and styling variables
 │   │   └── App.tsx             # Auth router and loader splash
-│   ├── tailwind.config.js      # Glow shadows and semantic color extensions
+│   ├── tailwind.config.js      # Custom matte colors and razor borders
 │   └── package.json            # Client scripts and dependencies
 │
 ├── server/                     # Node.js + Express REST Backend
@@ -90,51 +86,175 @@ vortex/
 │   │   ├── middleware/
 │   │   │   └── auth.js         # JWT validation flow
 │   │   ├── models/
-│   │   │   └── Schemas.js      # Unified Mongoose / Fallback DB schemas
+│   │   │   └── Schemas.js      # Mongoose schemas
 │   │   ├── routes/
-│   │   │   ├── auth.js         # JWT access key register & seed
+│   │   │   ├── auth.js         # JWT registration, login, and seeding
 │   │   │   └── tasks.js        # CRUD operations & audit logging
 │   │   └── index.js            # Main server entry & bootstrap
 │   └── package.json            # Server dependencies & scripts
 │
 ├── package.json                # Root workspace configuration
-└── README.md                   # Operational telemetry document
+└── README.md                   # System operational guide
 ```
+
+---
+
+## 📡 API Documentation
+
+All API requests are prefix-served at `/api`. Requests must include `Content-Type: application/json`. Protected endpoints require the JWT token passed as a Bearer token in the `Authorization` header: `Authorization: Bearer <token>`.
+
+### 1. Authentication Router (`/api/auth`)
+
+#### `POST /api/auth/register`
+* **Description:** Register a new account and pre-seed core tasks.
+* **Request Body:**
+  ```json
+  {
+    "name": "Jean-Luc Picard",
+    "email": "picard@enterprise.federation",
+    "password": "secure_password_123"
+  }
+  ```
+* **Response (201 Created):**
+  ```json
+  {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": "603d7c5e3b9f0a2d1c8b9a3f",
+      "name": "Jean-Luc Picard",
+      "email": "picard@enterprise.federation"
+    }
+  }
+  ```
+
+#### `POST /api/auth/login`
+* **Description:** Authenticate access credentials.
+* **Request Body:**
+  ```json
+  {
+    "email": "picard@enterprise.federation",
+    "password": "secure_password_123"
+  }
+  ```
+* **Response (200 OK):** *(Same payload structure as register)*
+
+#### `GET /api/auth/me`
+* **Description:** Fetch current logged-in session profile.
+* **Headers:** `Authorization: Bearer <token>`
+* **Response (200 OK):**
+  ```json
+  {
+    "id": "603d7c5e3b9f0a2d1c8b9a3f",
+    "name": "Jean-Luc Picard",
+    "email": "picard@enterprise.federation"
+  }
+  ```
+
+---
+
+### 2. Task Operational Router (`/api/tasks`)
+
+#### `GET /api/tasks`
+* **Description:** Retrieve all tasks belonging to the current user.
+* **Headers:** `Authorization: Bearer <token>`
+* **Response (200 OK):**
+  ```json
+  [
+    {
+      "_id": "603d7d7c5e3b9f0a2d1c8b9b",
+      "userId": "603d7c5e3b9f0a2d1c8b9a3f",
+      "title": "Calibrate warp drive coils",
+      "description": "Align plasma injectors across subspace channels.",
+      "status": "Todo",
+      "priority": "High",
+      "dueDate": "2026-06-05",
+      "tags": ["core", "engineering"],
+      "subtasks": [
+        { "_id": "sub1", "title": "Initiate magnetic lock", "completed": true }
+      ],
+      "activities": [
+        { "_id": "act1", "text": "Task matrix generated", "time": "2026-06-01T17:00:00Z" }
+      ],
+      "createdAt": "2026-06-01T17:00:00Z",
+      "updatedAt": "2026-06-01T17:05:00Z"
+    }
+  ]
+  ```
+
+#### `POST /api/tasks`
+* **Description:** Instantiate a new task.
+* **Headers:** `Authorization: Bearer <token>`
+* **Request Body:**
+  ```json
+  {
+    "title": "Refactor quantum state manager",
+    "description": "Optimize event loops.",
+    "status": "Todo",
+    "priority": "Medium",
+    "dueDate": "2026-06-10",
+    "tags": ["state", "system"]
+  }
+  ```
+* **Response (201 Created):** *(Returns the newly generated task object)*
+
+#### `PUT /api/tasks/:id`
+* **Description:** Update complete parameters of a task.
+* **Headers:** `Authorization: Bearer <token>`
+* **Request Body:** *(Accepts partial or complete task fields, including `subtasks` array)*
+* **Response (200 OK):** *(Returns the updated task object, with auto-generated audit activity log)*
+
+#### `PATCH /api/tasks/:id/status`
+* **Description:** Perform a rapid stage transition (Queue / Flight / Completed).
+* **Headers:** `Authorization: Bearer <token>`
+* **Request Body:**
+  ```json
+  {
+    "status": "In Progress"
+  }
+  ```
+* **Response (200 OK):** *(Returns the patched task with dynamic stage activity log)*
+
+#### `DELETE /api/tasks/:id`
+* **Description:** Wipe a task record from databases.
+* **Headers:** `Authorization: Bearer <token>`
+* **Response (200 OK):**
+  ```json
+  {
+    "message": "Task deleted successfully",
+    "id": "603d7d7c5e3b9f0a2d1c8b9b"
+  }
+  ```
 
 ---
 
 ## 🛸 Quick Setup
 
-Follow these simple steps to run VORTEX locally:
-
 ### 1. Enlist and Install Dependencies
-In the root directory of the project, run:
+Concurrently install all root, client, and server packages with a single trigger:
 ```bash
 npm run install:all
 ```
-This single command concurrently installs all root, client, and server packages.
 
-### 2. Ignite Development Environments
-Once installation is complete, run:
+### 2. Configure Environment Keys
+Add a `.env` file inside `/server` with these templates:
+```env
+PORT=5001
+JWT_SECRET=your_secure_signature_key
+MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.xxx.mongodb.net/vortex
+```
+*(Leave `MONGODB_URI` blank to auto-activate the zero-config offline persistent JSON databasefallback).*
+
+### 3. Ignite Development Server
+Concurrently boot both the Express server and Vite frontend:
 ```bash
 npm run dev
 ```
-This triggers both the Vite frontend server and nodemon Express backend concurrently:
-* **Frontend Dashboard:** [http://localhost:5173](http://localhost:5173)
-* **Backend Server:** [http://localhost:5001](http://localhost:5001)
-
-### 3. Setup Custom Database (Optional)
-By default, VORTEX launches in **offline mode**, caching user profiles and tasks to `server/data/db.json` automatically.
-To connect to MongoDB Atlas, add your connection string inside `/server/.env`:
-```env
-PORT=5001
-JWT_SECRET=vortex_quantum_secret_key_99
-MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.xxx.mongodb.net/vortex
-```
+* **Client Portal:** [http://localhost:5173](http://localhost:5173)
+* **Backend API:** [http://localhost:5001](http://localhost:5001)
 
 ---
 
-## 🎨 Architectural Decisions & Design Tradeoffs
+## 🎨 Architectural Decisions, Tradeoffs, & Assumptions
 
 ### 1. Inter-exchangeable Local persistent JSON DB fallbacks
 * **Decision:** To guarantee a seamless initial run experience, we avoided forcing immediate external database setup (which usually halts recruiters or developers on review). 
